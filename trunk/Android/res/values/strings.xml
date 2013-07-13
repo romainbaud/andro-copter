@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">AndroCopter</string>
+    <string name="suspension">&#8230;</string>
+    <string name="title_activity_main">AndroCopter</string>
+    <string name="serverIpAdress">Server IP address:</string>
+    <string name="connectToServer">Connect to server</string>
+
+</resources>

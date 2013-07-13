@@ -1,0 +1,37 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/serverIpAdress"
+        android:labelFor="@+id/serverIpEditText" />
+
+    <EditText
+        android:id="@+id/serverIpEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:inputType="textUri" >
+
+        <requestFocus />
+    </EditText>
+
+    <CheckBox
+        android:id="@+id/connectToServerCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/connectToServer"
+        android:onClick="onConnectToServerCheckBoxToggled" />
+    
+        <com.romainflash.androcopter.CameraPreview
+        android:id="@+id/cameraSurface"
+        android:enabled="false"
+        android:layout_width="176px"
+        android:layout_height="144px"
+        android:focusable="true"
+        android:clickable="true" />
+
+</LinearLayout>
