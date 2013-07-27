@@ -16,7 +16,8 @@ The documentation is still incomplete for now, but it should be more precise soo
 		
 = Wiring =
 Follow this schematic:
-
+http://andro-copter.googlecode.com/svn/trunk/Hardware/wiring.png
+http://andro-copter.googlecode.com/svn/trunk/Hardware/propellers_directions.png
 
 = Building the Android app and the PC software =
 Checkout the SVN repository. You should get four directories...more info on the compilation later.
@@ -49,6 +50,7 @@ Push the "Reset orientation button" to set the current orientation(yaw, pitch an
 
 == Fly ==
 Tick the "Regulators ON" checkbox again, and increase the trottle slowly.
+http://andro-copter.googlecode.com/svn/trunk/Hardware/xbox_gamepad_layout.png
 
 == Control states ==
 As long as the "Regulators ON" is unchecked, the propeller will remain stopped. The motors will also remain stopped if the thrust slider is at the minimum (zero). But if the thrust is higher than zero, the regulators output may make the propellers spin, so be careful (it can happen when the quadcopter is on the ground, but turned 180° from the reference, so it will try strongly to reach this position).
