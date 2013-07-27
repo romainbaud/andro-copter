@@ -28,6 +28,8 @@ public class TcpClient
 		this.tcpReceiver = receiver;
 		
 		txHeaderBuffer = new byte[5];
+		
+		currentlySending = false;
 	}
 	
 	void start(String serverIp)
@@ -158,6 +160,8 @@ public class TcpClient
 			if(socket == null || !socket.isConnected())
 				return;
 			
+			currentlySending = true;
+			
 			int messageSize = message.length;
 			int messageWithTypeSize = messageSize + 1;
 			
@@ -174,6 +178,8 @@ public class TcpClient
 
 			sendRawBytes(txHeaderBuffer); // Send the message header.
 			sendRawBytes(message); // Send the actual content of the message.
+			
+			currentlySending = false;
 		}
 		
 		public boolean isConnected()
@@ -217,6 +223,12 @@ public class TcpClient
 			connectThread.sendMessage(message, type);
 	}
 	
+	public void sendMessageNowOrSkip(byte[] message, int type)
+	{
+		if(!currentlySending && (connectThread != null))
+			connectThread.sendMessage(message, type);
+	}
+	
 	public boolean isConnected()
 	{
 		if(connectThread != null)
@@ -228,4 +240,5 @@ public class TcpClient
 	private byte[] txHeaderBuffer;
 	private TcpMessageReceiver tcpReceiver;
 	private ConnectThread connectThread;
+	private volatile boolean currentlySending;
 }
