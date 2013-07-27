@@ -18,7 +18,11 @@ public class CameraPreview extends SurfaceView implements Callback
 {
 	public static final int PHOTO_WIDTH = 1920; // [px].
 	public static final int PHOTO_HEIGHT = 1080; // [px].
-	public static final long MIN_FRAME_SPACING = 200000000; // [ns].
+	public static final int VIDEO_HD_WIDTH = 320; // [px].
+	public static final int VIDEO_HD_HEIGHT = 240; // [px].
+	public static final int VIDEO_SD_WIDTH = 176; // [px].
+	public static final int VIDEO_SD_HEIGHT = 144; // [px].
+	public static final long MIN_FRAME_SPACING = 100000000; // [ns] -> 0.1s.
 	
 	private SurfaceHolder mHolder;
 	private Camera mCamera;
@@ -28,6 +32,7 @@ public class CameraPreview extends SurfaceView implements Callback
     private Bitmap bitmap;
     private Camera.PictureCallback pictureReceiver;
     private long lastPictureTxTime;
+    private byte previewCallbackBuffer[];
 
 	public CameraPreview(Context context, AttributeSet as)
 	{
@@ -35,6 +40,14 @@ public class CameraPreview extends SurfaceView implements Callback
 		
 		pictureReceiver = new PictureReceiver();
 		lastPictureTxTime = System.nanoTime();
+		
+		// Allocate the preiew callback buffer.
+		int yStride   = (int) Math.ceil(((double)VIDEO_HD_WIDTH) / 16.0) * 16;
+		int uvStride  = (int) Math.ceil((((double)yStride) / 2) / 16.0) * 16;
+		int ySize     = yStride * VIDEO_HD_HEIGHT;
+		int uvSize    = uvStride * VIDEO_HD_HEIGHT / 2;
+		int size      = ySize + uvSize * 2;
+		previewCallbackBuffer = new byte[size];
 
 		// Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -53,8 +66,8 @@ public class CameraPreview extends SurfaceView implements Callback
         
         try
         {
-           mCamera.setPreviewDisplay(holder);
-           mCamera.startPreview();
+        	mCamera.setPreviewDisplay(holder);
+        	mCamera.startPreview();
         }
         catch (IOException exception)
         {
@@ -87,7 +100,9 @@ public class CameraPreview extends SurfaceView implements Callback
 	{
 		mCamera.stopPreview();
 		
-    	mCamera.setPreviewCallback(new PreviewReceiver(w, h));
+    	//mCamera.setPreviewCallback(new PreviewReceiver(w, h));
+		mCamera.setPreviewCallbackWithBuffer(new PreviewReceiver(w, h));
+		mCamera.addCallbackBuffer(previewCallbackBuffer);
     	
     	// Allocation des "tableaux de pixels".
     	rgbData = new int[w * h];
@@ -127,7 +142,7 @@ public class CameraPreview extends SurfaceView implements Callback
 			if(frameRequested && (currentTime-lastPictureTxTime>MIN_FRAME_SPACING))
 			{
 				lastPictureTxTime = currentTime;
-				
+
 				try
 				{
 					// Convert from YUV420 to RGB.
@@ -148,6 +163,9 @@ public class CameraPreview extends SurfaceView implements Callback
 					Log.w("AndroCopter", "Can't read preview data !");
 				}
 			}
+			
+			// Re-add the same unique buffer to the queue.
+			mCamera.addCallbackBuffer(previewCallbackBuffer);
 		}
 		
 		private int width, height;
@@ -177,7 +195,7 @@ public class CameraPreview extends SurfaceView implements Callback
 			{
 				public void run()
 				{
-					setLayoutParams(new LinearLayout.LayoutParams(320,240));
+					setLayoutParams(new LinearLayout.LayoutParams(VIDEO_HD_WIDTH, VIDEO_HD_HEIGHT));
 				}
 			});
     	}
@@ -187,7 +205,7 @@ public class CameraPreview extends SurfaceView implements Callback
 			{
 				public void run()
 				{
-					setLayoutParams(new LinearLayout.LayoutParams(176,144));
+					setLayoutParams(new LinearLayout.LayoutParams(VIDEO_SD_WIDTH, VIDEO_SD_HEIGHT));
 				}
 			});
     	}
@@ -202,6 +220,11 @@ public class CameraPreview extends SurfaceView implements Callback
     public synchronized void stopStreaming()
     {
     	frameRequested = false;
+    }
+    
+    public synchronized boolean isStreaming()
+    {
+    	return frameRequested;
     }
     
     public void takePicture(TcpClient tcp)

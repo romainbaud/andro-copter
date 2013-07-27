@@ -120,6 +120,8 @@ public class MainController implements TcpMessageReceiver, AdbListener
 		public void run()
 		{
 			again = true;
+			
+			long testLastTime = SystemClock.elapsedRealtimeNanos();
 
 			while(again)
 			{
@@ -130,6 +132,12 @@ public class MainController implements TcpMessageReceiver, AdbListener
 					SystemClock.sleep(1);
 					continue;
 				}
+				
+				long testCurrentTime = SystemClock.elapsedRealtimeNanos();
+				if(testCurrentTime > testLastTime + 20000000)
+					Log.w("AndroCopter", "Last loop took " + (testCurrentTime-testLastTime)/1000000 + "ms instead of 5ms!");
+				
+				testLastTime = testCurrentTime;
 
 				// Get the sensors data.
 				heliState = posRotSensors.getState();
@@ -253,21 +261,27 @@ public class MainController implements TcpMessageReceiver, AdbListener
 				}
 				
 				// Transmit the current state to the computer.
-				stateSendDividerCounter++;
-				
-				if(stateSendDividerCounter % STATE_SEND_DIVIDER == 0)
+				// If another component is transmitting (e.g. the video from the
+				// camera), then do not transmit, because this would involve
+				// waiting. This control loop should never be blocked!
+				//if(!camera.isStreaming())
 				{
-					String currStateStr = "" + (currentTime/1000000 % INT_MAX) +
-										  " " + currentYaw + " " + yawAngleTarget + " " + yawForce +
-										  " " + currentPitch + " " + pitchAngleTarget + " " + pitchForce +
-										  " " + currentRoll + " " + rollAngleTarget + " " + rollForce +
-										  " " + batteryVoltage +
-										  " " + 0 +
-										  " " + (regulatorEnabled?1:0) +
-										  " " + currentAltitude + " " + altitudeTarget + " " + altitudeForce;
-
-					client.sendMessage(currStateStr.getBytes(),
-									   TcpClient.TYPE_CURRENT_STATE);
+					stateSendDividerCounter++;
+					
+					if(stateSendDividerCounter % STATE_SEND_DIVIDER == 0)
+					{
+						String currStateStr = "" + (currentTime/1000000 % INT_MAX) +
+											  " " + currentYaw + " " + yawAngleTarget + " " + yawForce +
+											  " " + currentPitch + " " + pitchAngleTarget + " " + pitchForce +
+											  " " + currentRoll + " " + rollAngleTarget + " " + rollForce +
+											  " " + batteryVoltage +
+											  " " + 0 +
+											  " " + (regulatorEnabled?1:0) +
+											  " " + currentAltitude + " " + altitudeTarget + " " + altitudeForce;
+						
+							client.sendMessageNowOrSkip(currStateStr.getBytes(),
+											   TcpClient.TYPE_CURRENT_STATE);
+					}
 				}
 			}
 		}
