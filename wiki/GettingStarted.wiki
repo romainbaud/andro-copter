@@ -67,3 +67,11 @@ http://andro-copter.googlecode.com/svn/trunk/Hardware/xbox_gamepad_layout.png
 
 == Control states ==
 As long as the "Regulators ON" is unchecked, the propeller will remain stopped. The motors will also remain stopped if the thrust slider is at the minimum (zero). But if the thrust is higher than zero, the regulators output may make the propellers spin, so be careful (it can happen when the quadcopter is on the ground, but turned 180° from the reference, so it will try strongly to reach this position).
+
+= PID tuning =
+These are the current values I use for my 1300g quadcopter:
+  * Yaw: Kp=3, Ki=0; Kd=0.
+  * Pitch: Kp=0.5, Ki=0.1; Kd=0.15.
+  * Roll: Kp=0.5, Ki=0.1; Kd=0.15.
+Changing the PID coefficients in-flight is possible, but not recommended. Always be ready to hit the emergency stop button, in case the quadcopter would become unstable.
+Protecting the propellers will make the tuning phase safer. Extended arms, like the Project Home picture, will avoid that the propellers hit the ground.
