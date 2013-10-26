@@ -23,23 +23,23 @@ http://andro-copter.googlecode.com/svn/trunk/Hardware/propellers_directions.png
 Checkout the SVN repository. You should get four directories...more info on the compilation later.
 
 == AndroCopter for Android ==
--Install Eclipse with ADT (http://developer.android.com/sdk/index.html).
--Start Eclipse.
--Go to File > Import > Existing Projects into Workspace. Then set the root directory (andro-copter/Android/
--Import the Android project (in andro-copter/Android).
--Wait for the compilation to end.
--To send the app to the phone: Run As > Android Application.
+  * Install Eclipse with ADT (http://developer.android.com/sdk/index.html).
+  * Start Eclipse.
+  * Go to File > Import > Existing Projects into Workspace. Then set the root directory (andro-copter/Android/
+  * Import the Android project (in andro-copter/Android).
+  * Wait for the compilation to end.
+  * To send the app to the phone: Run As > Android Application.
 
 == AndroCopter Remote for PC ==
--Install Qt Creator and the Qt 4.8 libraries (http://qt-project.org/downloads). AndroCopter has not been tested with Qt 5 yet.
--Install the SDL 1.2 library (http://www.libsdl.org/download-1.2.php).
--Open the project into Qt Creator.
--Set the pathes in the file AndroCopter.pro (lines 34 and 35), to match your actual SDL installation path.
--Compile and Run.
+  * Install Qt Creator and the Qt 4.8 libraries (http://qt-project.org/downloads). AndroCopter has not been tested with Qt 5 yet.
+  * Install the SDL 1.2 library (http://www.libsdl.org/download-1.2.php).
+  * Open the project into Qt Creator.
+  * Set the pathes in the file AndroCopter.pro (lines 34 and 35), to match your actual SDL installation path.
+  * Compile and Run.
 
 == Arduino sketch ==
--Install the Arduino IDE (http://arduino.cc/en/Main/Software), and the ADK libraries (http://developer.android.com/tools/adk/adk.html).
--Open the Arduino sketch, and Upload it.
+  * Install the Arduino IDE (http://arduino.cc/en/Main/Software), and the ADK libraries (http://developer.android.com/tools/adk/adk.html).
+  * Open the Arduino sketch, and Upload it.
 
 = Fly =
 
