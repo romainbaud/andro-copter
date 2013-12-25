@@ -17,11 +17,9 @@
 #include <QThread>
 #include <QDebug>
 
-#include <SDL/SDL_joystick.h>
+#include <SDL2/SDL_joystick.h>
 
-//struct SDL_Joystick;
-
-// Axes and keys binding (unfortunately change between OSs...).
+// Axes and keys binding (unfortunately change between OS...).
 #ifdef __APPLE__
 #define THRUST_AXIS 1
 #define YAW_AXIS 0
@@ -37,7 +35,7 @@
 #define THRUST_AXIS 1
 #define YAW_AXIS 0
 #define PITCH_AXIS 3
-#define ROLL_AXIS 4
+#define ROLL_AXIS 2
 #define A_BUTTON 0
 #define B_BUTTON 1
 #define X_BUTTON 2
@@ -51,7 +49,7 @@
 #endif
 
 /// Encapsulate the SDL joystick interface.
-class Gamepad : private QThread
+class Gamepad
 {
 public:
 	/// Default constructor.
@@ -93,8 +91,7 @@ public:
 	/// \return the list of the buttons.
     QVector<bool> getButtons();
 	
-	/// Get if the gamepad is still connected or not. Warning, it seems to be
-	/// bogus!
+    /// Get if the gamepad is still connected or not.
 	/// \return true if the gamepad is still connected, false otherwise.
     bool isGamepadStillConnected();
 
@@ -104,8 +101,6 @@ private:
     QVector<int> hats;
     QVector<bool> buttons;
     SDL_Joystick *joystick;
-    int joystickIndex;
-    bool loopAgain;
 };
 
 #endif // GAMEPAD_H

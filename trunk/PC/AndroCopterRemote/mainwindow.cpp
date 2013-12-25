@@ -123,6 +123,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->reguCoefRollP, SIGNAL(editingFinished()), this, SLOT(updateReguCoefs()));
     connect(ui->reguCoefRollI, SIGNAL(editingFinished()), this, SLOT(updateReguCoefs()));
     connect(ui->reguCoefRollD, SIGNAL(editingFinished()), this, SLOT(updateReguCoefs()));
+    connect(ui->reguCoefAltitudeP, SIGNAL(editingFinished()), this, SLOT(updateReguCoefs()));
+    connect(ui->reguCoefAltitudeI, SIGNAL(editingFinished()), this, SLOT(updateReguCoefs()));
+    connect(ui->reguCoefAltitudeD, SIGNAL(editingFinished()), this, SLOT(updateReguCoefs()));
 
     connect(ui->regulatorsOnCheckBox, SIGNAL(toggled(bool)), SLOT(updateReguState(bool)));
     connect(ui->loggingCheckbox, SIGNAL(clicked()), this, SLOT(togglePhoneLogging()));
@@ -451,6 +454,7 @@ void MainWindow::computeAndSendCommands()
         {
             // The gamepad has just disconnected, this is very dangerous, so
             // we stop the quadcopter.
+            ui->logEdit->appendPlainText("### The gamepad has been disconnected! ###");
             emergencyStop();
             gamepadWasConnected = false;
             currentThrust = 0;
