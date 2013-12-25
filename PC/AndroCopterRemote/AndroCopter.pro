@@ -31,6 +31,6 @@ RESOURCES +=
 win32:RC_FILE += win_icon.rc
 
 # The SDL path. Change it according to your installation.
-INCLUDEPATH += C:/Users/rbaud/Programmation/Librairies/SDL-1.2.15-mingw/include
-LIBS += -LC:/Users/rbaud/Programmation/Librairies/SDL-1.2.15-mingw/lib -lSDL
+INCLUDEPATH += D:/rbaud/Programmation/Librairies/SDL-2.0/include
+LIBS += -LD:/rbaud/Programmation/Librairies/SDL-2.0/lib -lSDL2
 

@@ -1,6 +1,6 @@
 #include "gamepad.h"
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 Gamepad::Gamepad()
 {
@@ -13,9 +13,6 @@ Gamepad::Gamepad()
 
 Gamepad::~Gamepad()
 {
-    loopAgain = false;
-    wait(1000); // Let some time for the joystick thread to stop.
-
     if(joystick != 0)
     {
         SDL_JoystickClose(joystick);
@@ -28,12 +25,12 @@ Gamepad::~Gamepad()
 
 QStringList Gamepad::getGamepadsList()
 {
-    int nGP = SDL_NumJoysticks();
+    int nGamepads = SDL_NumJoysticks();
 
     QStringList list;
 
-    for(int i=0; i<nGP; i++)
-        list << SDL_JoystickName(i);
+    for(int i=0; i<nGamepads; i++)
+        list << SDL_JoystickNameForIndex(i);
 
     return list;
 }
@@ -42,57 +39,13 @@ void Gamepad::startMonitoring(int index)
 {
     joystick = SDL_JoystickOpen(index);
 
-    joystickIndex = index;
+    if(joystick == 0)
+        qDebug() << "Error while opening the joystick, index:" << index;
 
-    name = SDL_JoystickName(index);
+    name = SDL_JoystickName(joystick);
     axes.resize(SDL_JoystickNumAxes(joystick));
     hats.resize(SDL_JoystickNumHats(joystick));
     buttons.resize(SDL_JoystickNumButtons(joystick));
-
-    // Start events monitoring.
-    start();
-}
-
-void Gamepad::run()
-{
-    SDL_Event event;
-
-    loopAgain = true;
-
-    while(loopAgain)
-    {
-        while(SDL_PollEvent(&event))
-        {
-            if(event.jbutton.which == joystickIndex
-               || event.jaxis.which == joystickIndex
-               || event.jhat.which == joystickIndex)
-            {
-                switch(event.type)
-                {
-                case SDL_JOYBUTTONDOWN:
-                    buttons[event.jbutton.button] = true;
-                    break;
-
-                case SDL_JOYBUTTONUP:
-                    buttons[event.jbutton.button] = false;
-                    break;
-
-                case SDL_JOYAXISMOTION:
-                    axes[event.jaxis.axis] = event.jaxis.value;
-                    break;
-
-                case SDL_JOYHATMOTION:
-                    hats[event.jhat.hat] = event.jhat.value;
-                    break;
-
-                default:
-                    break;
-                }
-            }
-        }
-
-        msleep(10); // Sleep a bit to not overload the CPU.
-    }
 }
 
 QString Gamepad::getName()
@@ -102,21 +55,35 @@ QString Gamepad::getName()
 
 QVector<int> Gamepad::getAxes()
 {
+    SDL_JoystickUpdate();
+
+    for(int i=0; i<axes.size(); i++)
+        axes[i] = SDL_JoystickGetAxis(joystick, i);
+
     return axes;
 }
 
 QVector<int> Gamepad::getHats()
 {
+    SDL_JoystickUpdate();
+
+    for(int i=0; i<hats.size(); i++)
+        hats[i] = SDL_JoystickGetHat(joystick, i);
+
     return hats;
 }
 
 QVector<bool> Gamepad::getButtons()
 {
+    SDL_JoystickUpdate();
+
+    for(int i=0; i<buttons.size(); i++)
+        buttons[i] = SDL_JoystickGetButton(joystick, i);
+
     return buttons;
 }
 
-// FIXME : Does not work !
 bool Gamepad::isGamepadStillConnected()
 {
-    return getGamepadsList().contains(name);
+    return SDL_JoystickGetAttached(joystick);
 }
