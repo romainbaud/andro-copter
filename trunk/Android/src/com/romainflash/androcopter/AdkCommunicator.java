@@ -29,7 +29,6 @@ public class AdkCommunicator implements Runnable
 		this.context = context;
 		
 		txBuffer = new byte[4];
-		rxBuffer = new byte[2];
 	}
 	
 	public void start(boolean continuousMode) throws Exception
@@ -46,26 +45,28 @@ public class AdkCommunicator implements Runnable
 			return;
 		
 		UsbAccessory[] accessories = usbManager.getAccessoryList();
-		
-		if(accessories == null)
-			Log.d("AndroCopter", "No accessory, please connect one.");
-		else
+		UsbAccessory accessory = (accessories == null ? null : accessories[0]);
+		if (accessory != null)
 		{
-			usbAccessory = accessories[0];
-			
-			if(usbManager.hasPermission(usbAccessory))
-				openAccessory();
+			if (usbManager.hasPermission(accessory))
+			{
+				openAccessory(accessory);
+			}
 			else
 			{
-				synchronized(usbReceiver)
+				synchronized (usbReceiver)
 				{
 					if (!mPermissionRequestPending)
 					{
-						usbManager.requestPermission(usbAccessory, mPermissionIntent);
+						usbManager.requestPermission(accessory, mPermissionIntent);
 						mPermissionRequestPending = true;
 					}
 				}
 			}
+		}
+		else
+		{
+			Log.d("AndroCopter", "No accessory, please connect one.");
 		}
 	}
 	
@@ -97,48 +98,56 @@ public class AdkCommunicator implements Runnable
 		}
 	}
 	
-	private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
-		 
-	    public void onReceive(Context context, Intent intent) {
-	        String action = intent.getAction();
-	        
-	        if (ACTION_USB_PERMISSION.equals(action))
-	        {
-	            synchronized (this)
-	            {
-	            	usbAccessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-
-	                if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
-	                	openAccessory();
-	                else
-	                    Log.d("AndroCopter", "permission denied for accessory " + usbAccessory);
-	            }
-	        }
-	        else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action))
-	        {
-	        	usbAccessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
-	            if(usbAccessory != null)
-	            	closeAccessory();
-	        }
-
+	private final BroadcastReceiver usbReceiver = new BroadcastReceiver()
+	{ 
+	    public void onReceive(Context context, Intent intent)
+	    {
+	    	String action = intent.getAction();
+			if (ACTION_USB_PERMISSION.equals(action))
+			{
+				synchronized (this)
+				{
+					UsbAccessory accessory = (UsbAccessory) intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+					if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
+					{
+						openAccessory(accessory);
+					}
+					else
+					{
+						Log.d("AndroCopter", "permission denied for accessory " + accessory);
+					}
+					mPermissionRequestPending = false;
+				}
+			}
+			else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action))
+			{
+				UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+				if (accessory != null && accessory.equals(usbAccessory))
+				{
+					closeAccessory();
+				}
+			}
 	    }
 	};
 	
-	private void openAccessory()
+	private void openAccessory(UsbAccessory accessory)
 	{
-	    Log.d("AndroCopter", "openAccessory: " + usbAccessory);
-	    fileDescriptor = usbManager.openAccessory(usbAccessory);
+	    Log.d("AndroCopter", "openAccessory: " + accessory);
+	    fileDescriptor = usbManager.openAccessory(accessory);
 	    
 	    if (fileDescriptor != null)
 	    {
+	    	usbAccessory = accessory;
 	        FileDescriptor fd = fileDescriptor.getFileDescriptor();
 	        inputStream = new FileInputStream(fd);
 	        outputStream = new FileOutputStream(fd);
 	        rxThread = new Thread(null, this, "AccessoryThread");
 	        rxThread.start();
+	        
+	        Log.d("AndroCopter", "USB accessory opened.");
 	    }
 	    else
-			Log.d("AndroCopter", "accessory open fail");
+			Log.d("AndroCopter", "USB accessory open failed.");
 	}
 	
 	private void closeAccessory()
@@ -173,31 +182,40 @@ public class AdkCommunicator implements Runnable
 	
 	public void run()
 	{
-		int nBytesActuallyRead = 0;
+		int nBytesRead = 0;
 		readAgain = true;
+		byte[] rxBuffer = new byte[16384];
 		
-		try
+		int i;
+		while(readAgain)
 		{
-			while(readAgain)
+			try
 			{
-				nBytesActuallyRead = inputStream.read(rxBuffer);
+				nBytesRead = inputStream.read(rxBuffer);
+			}
+			catch (IOException e)
+			{
+				Log.e("AndroCopter", "IO error while reading the ADK!");
+			}
+			
+			i = 0;
+			while (i < nBytesRead)
+			{
+				int len = nBytesRead - i;
 				
-				if(nBytesActuallyRead == 2)
+				if(len >= 2)
 				{
-					int adcVal = ((rxBuffer[1]&0xff) << 8) | (rxBuffer[0]&0xff);
-					
-					Log.d("AndroCopter", "adcVal=" + adcVal);
+					int adcVal = ((rxBuffer[i+1]&0xff) << 8) | (rxBuffer[i+0]&0xff);
+					i += 2;
 					
 					float batteryLevel = ADC_TO_VOLTAGE * (float)adcVal;
+					
+					//Log.i("AndroCopter", "Battery voltage: " + batteryLevel);
 					
 					if(adbListener != null)
 						adbListener.onBatteryVoltageArrived(batteryLevel);
 				}
 			}
-		}
-		catch (IOException e)
-		{
-			Log.e("AndroCopter", "IO erreur while reading the ADK!");
 		}
 	}
 	
@@ -206,7 +224,7 @@ public class AdkCommunicator implements Runnable
 		void onBatteryVoltageArrived(float batteryVoltage);
 	}
 	
-	private byte[] txBuffer, rxBuffer;
+	private byte[] txBuffer;
 	private Context context;
 	private AdbListener adbListener;
 	private UsbManager usbManager;
