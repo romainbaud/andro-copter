@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network phonon
+QT += core widgets gui network
 
 TARGET = AndroCopterRemote
 TEMPLATE = app
@@ -31,6 +31,6 @@ RESOURCES +=
 win32:RC_FILE += win_icon.rc
 
 # The SDL path. Change it according to your installation.
-INCLUDEPATH += D:/rbaud/Programmation/Librairies/SDL-2.0/include
-LIBS += -LD:/rbaud/Programmation/Librairies/SDL-2.0/lib -lSDL2
+INCLUDEPATH += C:/.../SDL-2.0/include
+LIBS += -LC:/.../SDL-2.0/lib -lSDL2
 

@@ -30,7 +30,7 @@ There are three softwares folders:
 The Hardware folder contains some drawings and schematics to actually build an AndroCopter.
 
 How to compile the PC software?
-1. Install the Qt 4.8 (http://qt-project.org/downloads) and SDL 1.2 (http://www.libsdl.org/download-1.2.php) libraries at a known location.
+1. Install the Qt 5 (http://qt-project.org/downloads) and SDL 2 (http://www.libsdl.org/download-1.2.php) libraries at a known location.
 2. Edit the end of the AndroCopter.pro file, to make two pathes match your actual SDL install directory.
 3. Compile using Qt Creator, or just do "qmake && make" in a terminal (Qt command prompt on Windows).
 

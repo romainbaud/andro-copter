@@ -409,7 +409,7 @@ void MainWindow::sendMessage(QString text)
     if(clientSocket != 0 && clientSocket->isOpen())
     {
         text.append("\n");
-        clientSocket->write(text.toAscii());
+        clientSocket->write(text.toLatin1());
     }
 }
 
@@ -622,7 +622,7 @@ void MainWindow::saveMessagesLog()
                                                   .toString("yyyy-MM-dd-hh-mm-ss")));
 
     if(file.open(QFile::WriteOnly | QFile::Text))
-        file.write(ui->logEdit->toPlainText().toAscii());
+        file.write(ui->logEdit->toPlainText().toLatin1());
     else
         QMessageBox::warning(this, "Warning", "Can't write messages log to file!");
 }

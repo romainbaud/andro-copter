@@ -20,7 +20,7 @@
 * Read the documentation enclosed in the project report.
 */
 
-#include <QtGui/QApplication>
+#include <QtWidgets>
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
