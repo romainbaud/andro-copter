@@ -1,51 +1,62 @@
 #include "gamepad.h"
 
-#include <SDL2/SDL.h>
+#include <SFML/Window/Joystick.hpp>
+
+using namespace sf;
+
+#define JOYSTICK_AXIS_MAX 100.0
 
 Gamepad::Gamepad()
 {
-    joystick = 0;
-
-    // Setup SDL.
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
-    SDL_JoystickEventState(SDL_ENABLE);
+    gamepadIndex = 0;
 }
 
 Gamepad::~Gamepad()
 {
-    if(joystick != 0)
-    {
-        SDL_JoystickClose(joystick);
-        joystick = 0;
-    }
 
-    SDL_JoystickEventState(SDL_DISABLE);
-    SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
 }
 
 QStringList Gamepad::getGamepadsList()
 {
-    int nGamepads = SDL_NumJoysticks();
+    Joystick::update();
 
     QStringList list;
 
-    for(int i=0; i<nGamepads; i++)
-        list << SDL_JoystickNameForIndex(i);
+    for(int i=0; Joystick::isConnected(i); i++)
+    {
+        list << QString::fromStdString(Joystick::getIdentification(i).name.toAnsiString());
+        qDebug() << QString::fromStdString(Joystick::getIdentification(i).name.toAnsiString()) << " "
+                 << Joystick::getIdentification(i).productId << " "
+                 << Joystick::getIdentification(i).vendorId << endl;
+    }
 
     return list;
 }
 
 void Gamepad::startMonitoring(int index)
 {
-    joystick = SDL_JoystickOpen(index);
-
-    if(joystick == 0)
+    if(!Joystick::isConnected(index))
+    {
         qDebug() << "Error while opening the joystick, index:" << index;
+        return;
+    }
 
-    name = SDL_JoystickName(joystick);
-    axes.resize(SDL_JoystickNumAxes(joystick));
-    hats.resize(SDL_JoystickNumHats(joystick));
-    buttons.resize(SDL_JoystickNumButtons(joystick));
+    gamepadIndex = index;
+
+    // Get the name of the gamepad.
+    name = QString::fromStdString(Joystick::getIdentification(gamepadIndex).name.toAnsiString());
+
+    // Count the number of axes.
+    int nAxes = 0;
+    while(Joystick::hasAxis(gamepadIndex, (Joystick::Axis)nAxes))
+        nAxes++;
+
+    axes.resize(nAxes);
+
+    // Count the number of buttons.
+    buttons.resize(Joystick::getButtonCount(gamepadIndex));
+
+    qDebug() << "Detected " << nAxes << " axes and " << buttons.size() << " buttons." << endl;
 }
 
 QString Gamepad::getName()
@@ -53,37 +64,28 @@ QString Gamepad::getName()
     return name;
 }
 
-QVector<int> Gamepad::getAxes()
+QVector<double> Gamepad::getAxes()
 {
-    SDL_JoystickUpdate();
+    Joystick::update();
 
     for(int i=0; i<axes.size(); i++)
-        axes[i] = SDL_JoystickGetAxis(joystick, i);
+        axes[i] = (double)Joystick::getAxisPosition(gamepadIndex, (Joystick::Axis)i) / JOYSTICK_AXIS_MAX;
 
     return axes;
 }
 
-QVector<int> Gamepad::getHats()
-{
-    SDL_JoystickUpdate();
-
-    for(int i=0; i<hats.size(); i++)
-        hats[i] = SDL_JoystickGetHat(joystick, i);
-
-    return hats;
-}
-
 QVector<bool> Gamepad::getButtons()
 {
-    SDL_JoystickUpdate();
+    Joystick::update();
 
     for(int i=0; i<buttons.size(); i++)
-        buttons[i] = SDL_JoystickGetButton(joystick, i);
+        buttons[i] = Joystick::isButtonPressed(gamepadIndex, i);
 
     return buttons;
 }
 
 bool Gamepad::isGamepadStillConnected()
 {
-    return SDL_JoystickGetAttached(joystick);
+    return Joystick::isConnected(gamepadIndex) &&
+           (QString::fromStdString(Joystick::getIdentification(gamepadIndex).name.toAnsiString()) == name);
 }

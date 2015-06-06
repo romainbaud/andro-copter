@@ -444,7 +444,7 @@ void MainWindow::computeAndSendCommands()
 
     // Get the data from the gamepad, or from the spinners if there is no
     // gamepad connected.
-    QVector<int> axes = gamepad.getAxes();
+    QVector<double> axes = gamepad.getAxes();
 
     double pitchAngle, rollAngle;
 
@@ -475,9 +475,9 @@ void MainWindow::computeAndSendCommands()
         gamepadWasConnected = true;
 
         // Update the thrust.
-        if(abs(axes[THRUST_AXIS]) > DEAD_ZONE_GAMEPAD)
+        if(fabs(axes[THRUST_AXIS]) > DEAD_ZONE_GAMEPAD)
         {
-            currentThrust -= (int)(((double)axes[THRUST_AXIS]) / GP_AXIS_AMPLITUDE * THRUST_VARSPEED);
+            currentThrust -= (int)(axes[THRUST_AXIS] / GP_AXIS_AMPLITUDE * THRUST_VARSPEED);
 
             if(currentThrust < 0) // The thrust has saturation.
                 currentThrust = 0;
@@ -488,7 +488,7 @@ void MainWindow::computeAndSendCommands()
         // Update the yaw angle.
         if((!ui->lockYawTargetCheckBox->isChecked()) && abs(axes[YAW_AXIS]) > DEAD_ZONE_GAMEPAD)
         {
-            currentYaw += ((double)axes[YAW_AXIS]) / GP_AXIS_AMPLITUDE * YAW_VARSPEED;
+            currentYaw += axes[YAW_AXIS] / GP_AXIS_AMPLITUDE * YAW_VARSPEED;
 
             if(currentYaw >= 180) // The yaw angle is circular.
                 currentYaw -= 360;
@@ -497,8 +497,8 @@ void MainWindow::computeAndSendCommands()
         }
 
         // Set the other angles.
-        pitchAngle = ((double)axes[PITCH_AXIS]) / GP_AXIS_AMPLITUDE * PITCH_AMPLITUDE;
-        rollAngle = ((double)axes[ROLL_AXIS]) / GP_AXIS_AMPLITUDE * ROLL_AMPLITUDE;
+        pitchAngle = axes[PITCH_AXIS] / GP_AXIS_AMPLITUDE * PITCH_AMPLITUDE;
+        rollAngle = axes[ROLL_AXIS] / GP_AXIS_AMPLITUDE * ROLL_AMPLITUDE;
 
         QVector<bool> buttons = gamepad.getButtons();
 

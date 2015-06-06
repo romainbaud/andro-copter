@@ -18,7 +18,7 @@ const int IN_PORT = 7444;
 
 /// Maximum thrust command. It corresponds to the maximum of a 8 bits value,
 /// because the microcontroller expects a 8 bit value for the motors powers.
-const int MAX_THRUST = 255;
+const int MAX_THRUST = 255.0;
 
 /// Size of the first part of the message, which is the size of the rest of the
 /// message. This is a 32 bit value, so 4 bytes.
@@ -46,7 +46,7 @@ const double PITCH_AMPLITUDE = 20.0; // [deg].
 const double ROLL_AMPLITUDE = 20.0; // [deg].
 
 /// Amplitude of the gamepad sticks axis.
-const double GP_AXIS_AMPLITUDE = 32768.0;
+const double GP_AXIS_AMPLITUDE = 1.0;
 
 /// Time between each execution of the main loop, in milliseconds. So this will
 /// also change the real variation speed of the thrust and yaw!
@@ -59,7 +59,7 @@ const double UPDATE_PERIOD_S = ((double)UPDATE_PERIOD_MS) / 1000.0;
 /// This is useful, because when released, the input value is not exactly zero,
 /// so without the dead zone this error would be integrated, and the command
 /// would change unexpectedly. It is set to 5% of the full scale.
-const int DEAD_ZONE_GAMEPAD = GP_AXIS_AMPLITUDE / 20;
+const double DEAD_ZONE_GAMEPAD = GP_AXIS_AMPLITUDE / 20.0;
 
 /// Delay to compensate the network latency, for regulator state check.
 /// The regulators state of the quadcopter is commanded by a checkbox, which

@@ -32,9 +32,9 @@ Checkout the SVN repository. You should get four directories...more info on the 
 
 == AndroCopter Remote for PC ==
   * Install Qt Creator and the Qt 5 library (http://qt-project.org/downloads).
-  * Install the SDL 2.0 library (http://www.libsdl.org/download-2.0.php).
+  * Install the SFML 2.3 library (http://www.sfml-dev.org/download.php).
   * Open the project into Qt Creator.
-  * Set the pathes in the file AndroCopter.pro (lines 34 and 35), to match your actual SDL installation path.
+  * Set the pathes in the file AndroCopter.pro (lines 34 and 35), to match your actual SFML installation path.
   * Compile and Run.
 
 == Arduino sketch ==
