@@ -17,8 +17,6 @@
 #include <QThread>
 #include <QDebug>
 
-#include <SDL2/SDL_joystick.h>
-
 // Axes and keys binding (unfortunately change between OS...).
 #ifdef __APPLE__
 #define THRUST_AXIS 1
@@ -35,7 +33,7 @@
 #define THRUST_AXIS 1
 #define YAW_AXIS 0
 #define PITCH_AXIS 3
-#define ROLL_AXIS 2
+#define ROLL_AXIS 4
 #define A_BUTTON 0
 #define B_BUTTON 1
 #define X_BUTTON 2
@@ -77,14 +75,10 @@ public:
     QString getName();
 	
 	/// Get the list of all the axes of the monitored gamepad. Each number of
-	/// the QVector corresponds to the value of an analogic axis.
+    /// the QVector corresponds to the value of an analog axis, and is mapped
+    /// between -1 and 1.
 	/// \return the list of the axes.
-    QVector<int> getAxes();
-	
-	/// Get the list of all the hats of the monitored gamepad. Each number of
-	/// the QVector corresponds to the value of a hat.
-	/// \return the list of the hats.
-    QVector<int> getHats();
+    QVector<double> getAxes();
 	
 	/// Get the list of all the buttons of the monitored gamepad. true means
 	/// pushed, false means released.
@@ -97,10 +91,9 @@ public:
 
 private:
     QString name;
-    QVector<int> axes;
-    QVector<int> hats;
+    QVector<double> axes;
     QVector<bool> buttons;
-    SDL_Joystick *joystick;
+    int gamepadIndex;
 };
 
 #endif // GAMEPAD_H

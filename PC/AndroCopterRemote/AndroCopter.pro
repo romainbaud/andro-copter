@@ -31,6 +31,5 @@ RESOURCES +=
 win32:RC_FILE += win_icon.rc
 
 # The SDL path. Change it according to your installation.
-INCLUDEPATH += C:/.../SDL-2.0/include
-LIBS += -LC:/.../SDL-2.0/lib -lSDL2
-
+INCLUDEPATH += YOUR_SFML_PATH_HERE/SFML-2.3/include
+LIBS += -LYOUR_SFML_PATH_HERE/SFML-2.3/lib -lsfml-main -lsfml-system -lsfml-window
